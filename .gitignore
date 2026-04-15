@@ -1,3 +1,7 @@
 build
 build-test
 dist
+
+# Local audit/patch docs — not for upstream
+AUDIT*.md
+docs/security/

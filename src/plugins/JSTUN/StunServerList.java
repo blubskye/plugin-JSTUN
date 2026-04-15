@@ -9,6 +9,7 @@ import java.net.URLConnection;
 import java.util.List;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toList;
 
@@ -25,6 +26,27 @@ import static java.util.stream.Collectors.toList;
  * @see #loadStunServers(String)
  */
 public class StunServerList {
+
+	/**
+	 * Returns a hardcoded list of known-good public STUN servers.
+	 * Avoids the clearnet fetch from a third-party GitHub URL (SEC-1/SEC-2).
+	 *
+	 * @return The list of STUN servers
+	 */
+	public static List<StunServer> getHardcodedServers() {
+		return asList(
+				"stun.l.google.com:19302",
+				"stun1.l.google.com:19302",
+				"stun2.l.google.com:19302",
+				"stun3.l.google.com:19302",
+				"stun4.l.google.com:19302",
+				"stun.cloudflare.com:3478",
+				"stun.voipbuster.com:3478",
+				"stun.ekiga.net:3478",
+				"stun.voiparound.com:3478",
+				"stun.voipstunt.com:3478"
+		).stream().map(StunServer::parse).collect(toList());
+	}
 
 	/**
 	 * Loads a list of STUN servers from the given URL. The response is

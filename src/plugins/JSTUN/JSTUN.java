@@ -1,7 +1,6 @@
 package plugins.JSTUN;
 
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.net.BindException;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -105,13 +104,8 @@ public class JSTUN implements FredPlugin, FredPluginIPDetector, FredPluginThread
 	}
 
 	private List<StunServer> getStunServers() {
-		try {
-			return StunServerList.loadStunServers("https://raw.githubusercontent.com/pradt2/always-online-stun/master/valid_hosts.txt");
-		} catch (IOException e) {
-			return stream(publicSTUNServers)
-					.map(StunServer::parse)
-					.collect(toList());
-		}
+		// SEC-1/SEC-2: Use hardcoded list — no clearnet fetch to third-party GitHub URL.
+		return StunServerList.getHardcodedServers();
 	}
 
 	public static void main(String[] args) {
@@ -227,19 +221,9 @@ public class JSTUN implements FredPlugin, FredPluginIPDetector, FredPluginThread
 				NetworkInterface nif = NetworkInterface.getByInetAddress(startAddress);
 				int mtu = -1;
 				if(nif != null) {
-					try {
-						Class c = nif.getClass();
-						Method m = c.getDeclaredMethod("getMTU", new Class[0]);
-						if(m != null) {
-							Integer iMTU = (Integer) m.invoke(nif, new Object[0]);
-							if(iMTU != null) {
-								mtu = iMTU.intValue();
-								System.err.println("Found interface MTU: "+nif.getName()+" : "+mtu);
-							}
-						}
-					} catch (Throwable t) {
-						System.err.println("Trying to access 1.6 getMTU(), caught "+t);
-					}
+					// SEC-5: Use public API directly — reflection was unnecessary and breaks Java 9+ modules.
+					mtu = nif.getMTU();
+					Logger.normal(this, "Found interface MTU: "+nif.getName()+" : "+mtu);
 				}
 
 				if(ip != null) {
